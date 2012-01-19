@@ -65,6 +65,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
         self.Copy_file_to_tmp()
 
     def Copy_file_to_tmp(self):
+        # Call self.tmp_file's destructor only when re-opening a new file.
         del self.tmp_file
         self.tmp_file = tempfile.NamedTemporaryFile()
 
