@@ -26,8 +26,9 @@ class NetCDF_Editor(QtGui.QMainWindow):
         self.initUI()
 
     def Copy_file_to_tmp(self):
+        del self.tmp_file
         self.tmp_file = tempfile.NamedTemporaryFile()
-        print "tmp_filename =", self.tmp_file
+
         print "tmp_filename.name =", self.tmp_file.name
 
         shutil.copy2(self.input_filename, self.tmp_file.name)
@@ -68,6 +69,8 @@ class NetCDF_Editor(QtGui.QMainWindow):
     def OpenDialog(self):
 
         self.input_filename, _ = QtGui.QFileDialog.getOpenFileName(self, 'Open file')
+
+        self.Copy_file_to_tmp()
 
         #f = open(input_filename, 'r')
 
