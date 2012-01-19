@@ -25,14 +25,6 @@ class NetCDF_Editor(QtGui.QMainWindow):
 
         self.initUI()
 
-    def Copy_file_to_tmp(self):
-        del self.tmp_file
-        self.tmp_file = tempfile.NamedTemporaryFile()
-
-        print "tmp_filename.name =", self.tmp_file.name
-
-        shutil.copy2(self.input_filename, self.tmp_file.name)
-
     def initUI(self):
 
         textEdit = QtGui.QTextEdit()
@@ -72,11 +64,13 @@ class NetCDF_Editor(QtGui.QMainWindow):
 
         self.Copy_file_to_tmp()
 
-        #f = open(input_filename, 'r')
+    def Copy_file_to_tmp(self):
+        del self.tmp_file
+        self.tmp_file = tempfile.NamedTemporaryFile()
 
-        #with f:
-            #data = f.read()
-            #self.textEdit.setText(data)
+        print "tmp_filename.name =", self.tmp_file.name
+
+        shutil.copy2(self.input_filename, self.tmp_file.name)
 
 
 def main():
