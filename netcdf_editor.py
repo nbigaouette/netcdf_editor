@@ -35,6 +35,16 @@ class NetCDF_Editor(QtGui.QMainWindow):
         openFile.setStatusTip('Open new File')
         openFile.triggered.connect(self.OpenDialog)
 
+        saveFile = QtGui.QAction(QtGui.QIcon.fromTheme('document-save'), 'Save', self)
+        saveFile.setShortcut('Ctrl+S')
+        saveFile.setStatusTip('Save File')
+        saveFile.triggered.connect(self.Save)
+
+        saveFileAs = QtGui.QAction(QtGui.QIcon.fromTheme('document-save-as'), 'Save As', self)
+        saveFileAs.setShortcut('Ctrl+Shift+S')
+        saveFileAs.setStatusTip('Save File As')
+        saveFileAs.triggered.connect(self.SaveAs)
+
 
         exitAction = QtGui.QAction(QtGui.QIcon.fromTheme('application-exit'), 'Exit', self)
         exitAction.setShortcut('Ctrl+Q')
@@ -45,10 +55,15 @@ class NetCDF_Editor(QtGui.QMainWindow):
 
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(saveFile)
+        fileMenu.addAction(saveFileAs)
+        fileMenu.addAction(openFile)
         fileMenu.addAction(openFile)
         fileMenu.addAction(exitAction)
 
         toolbar = self.addToolBar('Exit')
+        toolbar.addAction(saveFile)
+        toolbar.addAction(saveFileAs)
         toolbar.addAction(openFile)
         toolbar.addAction(exitAction)
 
@@ -72,6 +87,17 @@ class NetCDF_Editor(QtGui.QMainWindow):
         print "tmp_filename.name =", self.tmp_file.name
 
         shutil.copy2(self.input_filename, self.tmp_file.name)
+
+    def Parse_NetCDF_File(self):
+        rootgrp = netCDF4.Dataset(self.tmp_file.name,  'a')
+
+    def Save(self):
+        print "Saving..."
+
+    def SaveAs(self):
+        print "Saving as..."
+        new_tmp_file = tempfile.NamedTemporaryFile()
+        shutil.copy2(self.tmp_file.name, new_tmp_file.name)
 
 
 def main():
