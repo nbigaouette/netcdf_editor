@@ -116,13 +116,18 @@ class NetCDF_Editor(QtGui.QMainWindow):
         line = 0
         for variable in self.rootgrp.variables:
             # Left column
-            grid.addWidget(QtGui.QLabel(variable), line, 0)
+            button = QtGui.QPushButton(variable, self)
+            button.clicked.connect(self.ButtonClick)
+            grid.addWidget(button, line, 0)
             # Right column
-            grid.addWidget(QtGui.QPushButton((str(self.rootgrp.variables[variable][0])), self), line, 1)
+            grid.addWidget(QtGui.QLabel(str(self.rootgrp.variables[variable][0])), line, 1)
             line += 1
         scrollWidget.setLayout(grid)
         self.scrollArea.setWidget(scrollWidget)
 
+    def ButtonClick(self):
+        sender = self.sender()
+        self.statusBar().showMessage(sender.text() + ' was pressed')
 
     def Save(self):
         print "Saving..."
