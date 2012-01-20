@@ -19,14 +19,14 @@ class NetCDF_Editor(QtGui.QMainWindow):
         self.tmp_file       = ""
         self.grid           = ""
 
-        self.initUI()
+        self.Initialize_UI()
 
         if (len(sys_argv) == 2):
             self.input_filename = sys_argv[1]
             self.tmp_file = self.Copy_file_to_tmp(self.input_filename)
             self.Parse_NetCDF_File()
 
-    def initUI(self):
+    def Initialize_UI(self):
 
         openFile = QtGui.QAction(QtGui.QIcon.fromTheme('system-file-manager'), 'Open', self)
         openFile.setShortcut('Ctrl+O')
