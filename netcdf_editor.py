@@ -176,14 +176,17 @@ class NetCDF_Editor(QtGui.QMainWindow):
         shutil.copy2(self.tmp_file.name, self.input_filename)
 
     def SaveAs(self):
-        print "Saving as..."
+        self.rootgrp.sync()
         new_tmp_file = self.Copy_file_to_tmp(self.tmp_file.name)
 
         new_filename, _ = QtGui.QFileDialog.getSaveFileName(self, "Save As", filter = ("NetCDF files (*.cdf *.nc)"))
         # Make sure .cdf is the extension
         if (new_filename[-4:] != ".cdf"):
             new_filename = new_filename + ".cdf"
-        print "Saving to", new_filename
+        print "Saving as", new_filename
+        shutil.copy2(new_tmp_file.name, new_filename)
+        self.filename = new_filename
+        self.tmp_file = new_tmp_file
 
         #new_filename = new_tmp_file.name + "_saveas"
         #print "new_tmp_file.name =", new_tmp_file.name
