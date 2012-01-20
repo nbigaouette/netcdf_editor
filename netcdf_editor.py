@@ -83,6 +83,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
         self.scrollArea = QtGui.QScrollArea()
         #self.scrollArea.setBackgroundRole(QtGui.QPalette.Dark)
         #self.scrollArea.setWidget(self.imageLabel)
+        self.scrollArea.setWidgetResizable(True)
         self.setCentralWidget(self.scrollArea)
 
         self.show()
