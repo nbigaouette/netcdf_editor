@@ -4,7 +4,7 @@
 
 
 import sys
-from PySide import QtGui
+from PySide import QtGui, QtCore
 
 import tempfile
 import numpy as np
@@ -18,17 +18,19 @@ class NetCDF_Editor(QtGui.QMainWindow):
 
         self.input_filename = ""
         self.tmp_file       = ""
-
-        if (len(sys_argv) == 2):
-            self.input_filename = sys_argv[1]
-            self.Copy_file_to_tmp()
+        self.grid           = ""
 
         self.initUI()
 
+        if (len(sys_argv) == 2):
+            self.input_filename = sys_argv[1]
+            self.tmp_file = self.Copy_file_to_tmp(self.input_filename)
+            self.Parse_NetCDF_File()
+
     def initUI(self):
 
-        textEdit = QtGui.QTextEdit()
-        self.setCentralWidget(textEdit)
+        #textEdit = QtGui.QTextEdit()
+        #self.setCentralWidget(textEdit)
 
         openFile = QtGui.QAction(QtGui.QIcon.fromTheme('system-file-manager'), 'Open', self)
         openFile.setShortcut('Ctrl+O')
@@ -44,7 +46,6 @@ class NetCDF_Editor(QtGui.QMainWindow):
         saveFileAs.setShortcut('Ctrl+Shift+S')
         saveFileAs.setStatusTip('Save File As')
         saveFileAs.triggered.connect(self.SaveAs)
-
 
         exitAction = QtGui.QAction(QtGui.QIcon.fromTheme('application-exit'), 'Exit', self)
         exitAction.setShortcut('Ctrl+Q')
@@ -67,9 +68,22 @@ class NetCDF_Editor(QtGui.QMainWindow):
         toolbar.addAction(openFile)
         toolbar.addAction(exitAction)
 
-        self.setGeometry(300, 300, 800, 600)
+        self.setGeometry(0, 0, 800, 600)
         self.setWindowTitle('Main window')
         self.setWindowIcon(QtGui.QIcon.fromTheme('esd'))
+
+        # Center window
+        qr = self.frameGeometry()
+        cp = QtGui.QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
+
+        #self.imageLabel = QtGui.QLabel()
+        #self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage("happyguy.png")))
+        self.scrollArea = QtGui.QScrollArea()
+        #self.scrollArea.setBackgroundRole(QtGui.QPalette.Dark)
+        #self.scrollArea.setWidget(self.imageLabel)
+        self.setCentralWidget(self.scrollArea)
 
         self.show()
 
@@ -77,27 +91,54 @@ class NetCDF_Editor(QtGui.QMainWindow):
 
         self.input_filename, _ = QtGui.QFileDialog.getOpenFileName(self, 'Open file')
 
-        self.Copy_file_to_tmp()
-
-    def Copy_file_to_tmp(self):
-        # Call self.tmp_file's destructor only when re-opening a new file.
         del self.tmp_file
-        self.tmp_file = tempfile.NamedTemporaryFile()
+        self.tmp_file = self.Copy_file_to_tmp(self.input_filename)
 
-        print "tmp_filename.name =", self.tmp_file.name
+    def Copy_file_to_tmp(self, filename):
+        tmp_file = tempfile.NamedTemporaryFile()
 
-        shutil.copy2(self.input_filename, self.tmp_file.name)
+        print "tmp_filename.name =", tmp_file.name
+
+        shutil.copy2(filename, tmp_file.name)
+
+        return tmp_file
 
     def Parse_NetCDF_File(self):
-        rootgrp = netCDF4.Dataset(self.tmp_file.name,  'a')
+        self.rootgrp = netCDF4.Dataset(self.tmp_file.name,  'a')
+
+        self.Display_NetCDF_File()
+
+    def Display_NetCDF_File(self):
+
+        scrollWidget = QtGui.QWidget()
+        grid = QtGui.QGridLayout()
+        line = 0
+        for variable in self.rootgrp.variables:
+            # Left column
+            grid.addWidget(QtGui.QLabel(variable), line, 0)
+            # Right column
+            grid.addWidget(QtGui.QLabel(str(self.rootgrp.variables[variable][0])), line, 1)
+            line += 1
+        scrollWidget.setLayout(grid)
+        self.scrollArea.setWidget(scrollWidget)
+
 
     def Save(self):
         print "Saving..."
 
     def SaveAs(self):
         print "Saving as..."
-        new_tmp_file = tempfile.NamedTemporaryFile()
-        shutil.copy2(self.tmp_file.name, new_tmp_file.name)
+        new_tmp_file = self.Copy_file_to_tmp(self.tmp_file.name)
+
+        new_filename, _ = QtGui.QFileDialog.getSaveFileName(self, "Save As")
+        # Make sure .cdf is the extension
+        if (new_filename[-4:] != ".cdf"):
+            new_filename = new_filename + ".cdf"
+        print "Saving to", new_filename
+
+        #new_filename = new_tmp_file.name + "_saveas"
+        #print "new_tmp_file.name =", new_tmp_file.name
+        #shutil.copy2(new_tmp_file.name, new_filename)
 
 
 def main():
