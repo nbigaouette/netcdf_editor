@@ -17,14 +17,15 @@ class NetCDF_Editor(QtGui.QMainWindow):
 
         self.input_filename = ""
         self.tmp_file       = ""
+
         self.grid           = ""
 
         self.Initialize_UI()
 
         if (len(sys_argv) == 2):
             self.input_filename = sys_argv[1]
-            self.tmp_file = self.Copy_file_to_tmp(self.input_filename)
-            self.Parse_NetCDF_File()
+            self.tmp_file = self.Generate_tmpfile()
+            self.Refresh_View()
 
     def Initialize_UI(self):
 
@@ -46,7 +47,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
         refresh = QtGui.QAction(QtGui.QIcon.fromTheme('view-refresh'), 'Refresh', self)
         refresh.setShortcut('F5')
         refresh.setStatusTip('Refresh')
-        refresh.triggered.connect(self.Parse_NetCDF_File)
+        refresh.triggered.connect(self.Refresh_View)
 
         exitAction = QtGui.QAction(QtGui.QIcon.fromTheme('application-exit'), 'Exit', self)
         exitAction.setShortcut('Ctrl+Q')
@@ -86,28 +87,43 @@ class NetCDF_Editor(QtGui.QMainWindow):
 
         self.show()
 
+    def Refresh_View(self):
+        # Copy the file to /tmp
+        self.Copy_file_to_tmp()
+
+        # Re-open it
+        self.Parse_NetCDF_File()
+
+        # Re-draw the frame
+        self.Draw()
+
+    def Copy_file_to_tmp(self):
+        print "Copying", self.input_filename, "to", self.tmp_file.name
+        shutil.copy2(self.input_filename, self.tmp_file.name)
+
+    def Generate_tmpfile(self):
+        return tempfile.NamedTemporaryFile()
+
+    def Parse_NetCDF_File(self):
+        try:
+            self.rootgrp.close()
+            del self.rootgrp
+        except AttributeError:
+            pass
+        print "Parsing", self.tmp_file.name
+        self.rootgrp = netCDF4.Dataset(self.tmp_file.name,  'a')
+        print "    ", self.rootgrp.variables["algorithm"][0]
+
     def OpenDialog(self):
 
         self.input_filename, _ = QtGui.QFileDialog.getOpenFileName(self, 'Open file', filter = ("NetCDF files (*.cdf *.nc)"))
 
         del self.tmp_file
-        self.tmp_file = self.Copy_file_to_tmp(self.input_filename)
+        self.tmp_file = self.Generate_tmpfile()
 
-    def Copy_file_to_tmp(self, filename):
-        tmp_file = tempfile.NamedTemporaryFile()
+        self.Refresh_View()
 
-        print "tmp_filename.name =", tmp_file.name
-
-        shutil.copy2(filename, tmp_file.name)
-
-        return tmp_file
-
-    def Parse_NetCDF_File(self):
-        self.rootgrp = netCDF4.Dataset(self.tmp_file.name,  'a')
-
-        self.Display_NetCDF_File()
-
-    def Display_NetCDF_File(self):
+    def Draw(self):
 
         scrollWidget = QtGui.QWidget()
         grid = QtGui.QGridLayout()
@@ -118,11 +134,16 @@ class NetCDF_Editor(QtGui.QMainWindow):
             button.setToolTip("Click to edit \"" + variable + "\"'s value")
             button.clicked.connect(self.ButtonClick)
             grid.addWidget(button, line, 0)
+            if (variable == "algorithm"):
+                print (variable, str(self.rootgrp.variables[variable][0]))
             # Right column
             grid.addWidget(QtGui.QLabel(str(self.rootgrp.variables[variable][0])), line, 1)
             line += 1
         scrollWidget.setLayout(grid)
         self.scrollArea.setWidget(scrollWidget)
+
+
+
 
     def Change_NetCDF_Value(self, variable, text):
         new_variable_value_string = text
@@ -154,7 +175,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
         else:
             self.rootgrp.variables[variable][0] = new_variable_value
 
-        self.Display_NetCDF_File()
+        self.Draw()
 
     def ButtonClick(self):
         sender = self.sender()
