@@ -148,15 +148,18 @@ class NetCDF_Editor(QtGui.QMainWindow):
             button.setToolTip("Click to edit \"" + variable + "\"'s value")
             button.clicked.connect(self.ButtonClick)
             grid.addWidget(button, line, 0)
-            #print (variable, str(self.rootgrp.variables[variable][0]))
             # Right column
-            grid.addWidget(QtGui.QLabel(str(self.rootgrp.variables[variable][0])), line, 1)
+            if (type(self.rootgrp.variables[variable][0]) == np.string_):
+                # Collapse the list of characters into a real string
+                value_to_show = ""
+                for i in range(len(self.rootgrp.variables[variable][:])):
+                    value_to_show = value_to_show + self.rootgrp.variables[variable][i]
+                grid.addWidget(QtGui.QLabel(value_to_show), line, 1)
+            else:
+                grid.addWidget(QtGui.QLabel(str(self.rootgrp.variables[variable][0])), line, 1)
             line += 1
         scrollWidget.setLayout(grid)
         self.scrollArea.setWidget(scrollWidget)
-
-
-
 
     def Change_NetCDF_Value(self, variable, text):
         new_variable_value_string = text
@@ -184,7 +187,20 @@ class NetCDF_Editor(QtGui.QMainWindow):
 
 
         if (variable_type == np.string_):
-            QtGui.QMessageBox.warning(self, "Error", "Sorry, changing strings not yet implemented.")
+            #QtGui.QMessageBox.warning(self, "Error", "Sorry, changing strings not yet implemented.")
+            prev_string_length  = len(self.rootgrp.variables[variable])
+            new_string_length   = len(new_variable_value)
+
+            # Overwrite the old string one character at a time. NetCDF will expand the
+            # string size automatically.
+            for i in xrange(new_string_length):
+                self.rootgrp.variables[variable][i] = new_variable_value[i]
+            # If the new string is smaller, we need to set the last character to NULL
+            # so that the C/C++ code will get the string size correctly. We could set
+            # just the last character, but we clear the rest for cosmetic reasons.
+            for i in xrange(new_string_length, prev_string_length):
+                self.rootgrp.variables[variable][i] = ""
+
         else:
             self.rootgrp.variables[variable][0] = new_variable_value
 
@@ -198,12 +214,9 @@ class NetCDF_Editor(QtGui.QMainWindow):
         text, ok = QtGui.QInputDialog.getText(self, "Change variable's value", "Enter new value for \"" + variable + "\"")
         if ok:
             var_type = type(self.rootgrp.variables[variable][0])
-            if (var_type == np.string_):
-                QtGui.QMessageBox.warning(self, "Error", "Sorry, changing strings not yet implemented.")
-            else:
-                self.file_is_saved = False
-                self.Change_NetCDF_Value(variable, text)
-                self.statusBar().showMessage("Changed " + variable + "'s value to " + text)
+            self.file_is_saved = False
+            self.Change_NetCDF_Value(variable, text)
+            self.statusBar().showMessage("Changed " + variable + "'s value to " + text)
 
     def Save(self):
         print "Saving", self.input_filename
