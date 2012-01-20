@@ -17,6 +17,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
 
         self.input_filename = ""
         self.tmp_file       = ""
+        self.file_is_saved  = True
         self.Initialize_UI()
 
         if (len(sys_argv) == 2):
@@ -85,11 +86,23 @@ class NetCDF_Editor(QtGui.QMainWindow):
         self.show()
 
     def Refresh_View(self):
+        if (not self.file_is_saved):
+            answer = QtGui.QMessageBox.question(self, "Warning", "The file is not saved! Save it now?", QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
+            if (answer == QtGui.QMessageBox.Yes):
+                self.Save()
+            else:
+                answer = QtGui.QMessageBox.question(self, "Warning", "The file is not saved! Refresh anyway? You will loose any modifications...", QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+                if (answer == QtGui.QMessageBox.No):
+                    return
+                else:
+                    self.statusBar().showMessage("Refreshing, modifications lost!")
         try:
             self.rootgrp.close()
             del self.rootgrp
         except AttributeError:
             pass
+
+        self.file_is_saved = True
 
         # Copy the file to /tmp
         self.Copy_file_to_tmp()
@@ -191,6 +204,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
             if (var_type == np.string_):
                 QtGui.QMessageBox.warning(self, "Error", "Sorry, changing strings not yet implemented.")
             else:
+                self.file_is_saved = False
                 self.Change_NetCDF_Value(variable, text)
                 self.statusBar().showMessage("Changed " + variable + "'s value to " + text)
 
@@ -198,6 +212,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
         print "Saving", self.input_filename
         self.rootgrp.sync()
         shutil.copy2(self.tmp_file.name, self.input_filename)
+        self.file_is_saved = True
 
     def SaveAs(self):
         self.rootgrp.sync()
