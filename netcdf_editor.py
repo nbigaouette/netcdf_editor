@@ -128,7 +128,6 @@ class NetCDF_Editor(QtGui.QMainWindow):
             pass
         print "Parsing", self.tmp_file.name
         self.rootgrp = netCDF4.Dataset(self.tmp_file.name,  'a')
-        print "    ", self.rootgrp.variables["algorithm"][0]
 
     def OpenDialog(self):
 
@@ -140,7 +139,6 @@ class NetCDF_Editor(QtGui.QMainWindow):
         self.Refresh_View()
 
     def Draw(self):
-
         scrollWidget = QtGui.QWidget()
         grid = QtGui.QGridLayout()
         line = 0
@@ -150,8 +148,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
             button.setToolTip("Click to edit \"" + variable + "\"'s value")
             button.clicked.connect(self.ButtonClick)
             grid.addWidget(button, line, 0)
-            if (variable == "algorithm"):
-                print (variable, str(self.rootgrp.variables[variable][0]))
+            #print (variable, str(self.rootgrp.variables[variable][0]))
             # Right column
             grid.addWidget(QtGui.QLabel(str(self.rootgrp.variables[variable][0])), line, 1)
             line += 1
