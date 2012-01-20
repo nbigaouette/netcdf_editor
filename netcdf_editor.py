@@ -43,6 +43,11 @@ class NetCDF_Editor(QtGui.QMainWindow):
         saveFileAs.setStatusTip('Save File As')
         saveFileAs.triggered.connect(self.SaveAs)
 
+        refresh = QtGui.QAction(QtGui.QIcon.fromTheme('view-refresh'), 'Refresh', self)
+        refresh.setShortcut('F5')
+        refresh.setStatusTip('Refresh')
+        refresh.triggered.connect(self.Parse_NetCDF_File)
+
         exitAction = QtGui.QAction(QtGui.QIcon.fromTheme('application-exit'), 'Exit', self)
         exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
@@ -55,13 +60,14 @@ class NetCDF_Editor(QtGui.QMainWindow):
         fileMenu.addAction(saveFile)
         fileMenu.addAction(saveFileAs)
         fileMenu.addAction(openFile)
-        fileMenu.addAction(openFile)
+        fileMenu.addAction(refresh)
         fileMenu.addAction(exitAction)
 
         toolbar = self.addToolBar('Exit')
+        toolbar.addAction(openFile)
         toolbar.addAction(saveFile)
         toolbar.addAction(saveFileAs)
-        toolbar.addAction(openFile)
+        toolbar.addAction(refresh)
         toolbar.addAction(exitAction)
 
         self.setGeometry(0, 0, 800, 600)
