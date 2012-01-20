@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 
-
 import sys
 from PySide import QtGui, QtCore
 
@@ -28,9 +27,6 @@ class NetCDF_Editor(QtGui.QMainWindow):
             self.Parse_NetCDF_File()
 
     def initUI(self):
-
-        #textEdit = QtGui.QTextEdit()
-        #self.setCentralWidget(textEdit)
 
         openFile = QtGui.QAction(QtGui.QIcon.fromTheme('system-file-manager'), 'Open', self)
         openFile.setShortcut('Ctrl+O')
@@ -78,11 +74,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
-        #self.imageLabel = QtGui.QLabel()
-        #self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage("happyguy.png")))
         self.scrollArea = QtGui.QScrollArea()
-        #self.scrollArea.setBackgroundRole(QtGui.QPalette.Dark)
-        #self.scrollArea.setWidget(self.imageLabel)
         self.scrollArea.setWidgetResizable(True)
         self.setCentralWidget(self.scrollArea)
 
@@ -117,6 +109,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
         for variable in self.rootgrp.variables:
             # Left column
             button = QtGui.QPushButton(variable, self)
+            button.setToolTip("Click to edit \"" + variable + "\"'s value")
             button.clicked.connect(self.ButtonClick)
             grid.addWidget(button, line, 0)
             # Right column
@@ -125,12 +118,57 @@ class NetCDF_Editor(QtGui.QMainWindow):
         scrollWidget.setLayout(grid)
         self.scrollArea.setWidget(scrollWidget)
 
+    def Change_NetCDF_Value(self, variable, text):
+        new_variable_value_string = text
+
+        variable_type = type(self.rootgrp.variables[variable][0])
+        # Detect file type
+        if (variable_type == np.int32):
+            new_variable_value = np.int32(new_variable_value_string)
+        elif (variable_type == np.float32):
+            new_variable_value = np.float32(new_variable_value_string)
+        elif (variable_type == np.float64):
+            new_variable_value = np.float64(new_variable_value_string)
+        elif (variable_type == np.int8):
+            if (new_variable_value_string.lower() == "true" or new_variable_value_string == "1"):
+                new_variable_value = np.int8(True)
+            else:
+                new_variable_value = np.int8(False)
+        elif (variable_type == np.string_):
+            new_variable_value = new_variable_value_string
+        else:
+            print "ERROR: Supported types are:"
+            print "    int, float, double, bool, string"
+            print "Exiting."
+            sys.exit(0)
+
+
+        if (variable_type == np.string_):
+            QtGui.QMessageBox.warning(self, "Error", "Sorry, changing strings not yet implemented.")
+        else:
+            self.rootgrp.variables[variable][0] = new_variable_value
+
+        self.Display_NetCDF_File()
+
     def ButtonClick(self):
         sender = self.sender()
-        self.statusBar().showMessage(sender.text() + ' was pressed')
+        variable = sender.text()
+        self.statusBar().showMessage("Changing " + variable + "'s value")
+
+        text, ok = QtGui.QInputDialog.getText(self, "Change variable's value", "Enter new value for \"" + variable + "\"")
+        if ok:
+            #le.setText(str(text))
+            var_type = type(self.rootgrp.variables[variable][0])
+            if (var_type == np.string_):
+                QtGui.QMessageBox.warning(self, "Error", "Sorry, changing strings not yet implemented.")
+            else:
+                self.Change_NetCDF_Value(variable, text)
+                self.statusBar().showMessage("Changed " + variable + "'s value to " + text)
 
     def Save(self):
         print "Saving..."
+        self.rootgrp.sync()
+        shutil.copy2(self.tmp_file.name, self.input_filename)
 
     def SaveAs(self):
         print "Saving as..."
