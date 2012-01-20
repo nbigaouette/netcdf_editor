@@ -157,7 +157,6 @@ class NetCDF_Editor(QtGui.QMainWindow):
 
         text, ok = QtGui.QInputDialog.getText(self, "Change variable's value", "Enter new value for \"" + variable + "\"")
         if ok:
-            #le.setText(str(text))
             var_type = type(self.rootgrp.variables[variable][0])
             if (var_type == np.string_):
                 QtGui.QMessageBox.warning(self, "Error", "Sorry, changing strings not yet implemented.")
