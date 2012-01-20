@@ -171,7 +171,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
                 self.statusBar().showMessage("Changed " + variable + "'s value to " + text)
 
     def Save(self):
-        print "Saving..."
+        print "Saving", self.input_filename
         self.rootgrp.sync()
         shutil.copy2(self.tmp_file.name, self.input_filename)
 
