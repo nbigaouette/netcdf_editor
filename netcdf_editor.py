@@ -118,7 +118,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
             # Left column
             grid.addWidget(QtGui.QLabel(variable), line, 0)
             # Right column
-            grid.addWidget(QtGui.QLabel(str(self.rootgrp.variables[variable][0])), line, 1)
+            grid.addWidget(QtGui.QPushButton((str(self.rootgrp.variables[variable][0])), self), line, 1)
             line += 1
         scrollWidget.setLayout(grid)
         self.scrollArea.setWidget(scrollWidget)
