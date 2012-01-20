@@ -17,9 +17,6 @@ class NetCDF_Editor(QtGui.QMainWindow):
 
         self.input_filename = ""
         self.tmp_file       = ""
-
-        self.grid           = ""
-
         self.Initialize_UI()
 
         if (len(sys_argv) == 2):
