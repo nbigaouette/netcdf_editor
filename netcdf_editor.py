@@ -85,6 +85,12 @@ class NetCDF_Editor(QtGui.QMainWindow):
         self.show()
 
     def Refresh_View(self):
+        try:
+            self.rootgrp.close()
+            del self.rootgrp
+        except AttributeError:
+            pass
+
         # Copy the file to /tmp
         self.Copy_file_to_tmp()
 
