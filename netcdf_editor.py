@@ -2,7 +2,10 @@
 # -*- coding: utf-8 -*-
 
 
-from PySide import QtGui, QtCore
+try:
+    from PySide import QtGui, QtCore
+except ImportError:
+    from PyQt4 import QtGui, QtCore
 
 import sys
 import tempfile
