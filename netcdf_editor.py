@@ -2,9 +2,12 @@
 # -*- coding: utf-8 -*-
 
 
-import sys
-from PySide import QtGui, QtCore
+try:
+    from PySide import QtGui, QtCore
+except ImportError:
+    from PyQt4 import QtGui, QtCore
 
+import sys
 import tempfile
 import numpy as np
 import netCDF4
