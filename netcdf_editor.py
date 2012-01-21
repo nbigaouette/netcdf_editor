@@ -4,9 +4,10 @@
 
 try:
     from PySide import QtGui, QtCore
+    Use_PyQt4_instead_of_PySide = False
 except ImportError:
     from PyQt4 import QtGui, QtCore
-
+    Use_PyQt4_instead_of_PySide = True
 import sys
 import tempfile
 import numpy as np
@@ -230,7 +231,11 @@ class NetCDF_Editor(QtGui.QMainWindow):
     def SaveAs(self):
         self.rootgrp.sync()
 
-        new_filename, _ = QtGui.QFileDialog.getSaveFileName(self, "Save As", filter = ("NetCDF files (*.cdf *.nc)"))
+        new_filename_and_other = QtGui.QFileDialog.getSaveFileName(self, "Save As", filter = ("NetCDF files (*.cdf *.nc)"))
+        if (Use_PyQt4_instead_of_PySide):
+            new_filename = new_filename_and_other
+        else:
+            new_filename = new_filename_and_other[0]
         print "Saving as", new_filename
         shutil.copy2(self.tmp_file.name, new_filename)
         self.filename = new_filename
