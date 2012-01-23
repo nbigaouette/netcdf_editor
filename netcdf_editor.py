@@ -164,14 +164,8 @@ class NetCDF_Editor(QtGui.QMainWindow):
             button.clicked.connect(self.ButtonClick)
             grid.addWidget(button, line, 0)
             # Right column
-            if (type(self.rootgrp.variables[variable][0]) == np.string_):
-                # Collapse the list of characters into a real string
-                value_to_show = ""
-                for i in range(len(self.rootgrp.variables[variable][:])):
-                    value_to_show = value_to_show + self.rootgrp.variables[variable][i]
-                grid.addWidget(QtGui.QLabel(value_to_show), line, 1)
-            else:
-                grid.addWidget(QtGui.QLabel(str(self.rootgrp.variables[variable][0])), line, 1)
+            value_to_show = self.Get_String_From_Variable_Content(variable)
+            grid.addWidget(QtGui.QLabel(value_to_show), line, 1)
             line += 1
         scrollWidget.setLayout(grid)
         self.scrollArea.setWidget(scrollWidget)
