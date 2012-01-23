@@ -220,7 +220,9 @@ class NetCDF_Editor(QtGui.QMainWindow):
         variable = sender.text()
         self.statusBar().showMessage("Changing " + variable + "'s value")
 
-        text, ok = QtGui.QInputDialog.getText(self, "Change variable's value", "Enter new value for \"" + variable + "\"")
+        old_value = self.Get_String_From_Variable_Content(variable)
+
+        text, ok = QtGui.QInputDialog.getText(self, "Change variable's value", "Enter new value for \"" + variable + "\"", QtGui.QLineEdit.Normal, old_value)
         if ok:
             var_type = type(self.rootgrp.variables[variable][0])
             self.file_is_saved = False
