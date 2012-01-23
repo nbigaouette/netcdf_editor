@@ -8,6 +8,7 @@ try:
 except ImportError:
     from PyQt4 import QtGui, QtCore
     Use_PyQt4_instead_of_PySide = True
+
 import sys
 import tempfile
 import numpy as np
