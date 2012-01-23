@@ -143,6 +143,16 @@ class NetCDF_Editor(QtGui.QMainWindow):
 
         self.Refresh_View()
 
+    def Get_String_From_Variable_Content(self, variable):
+        if (type(self.rootgrp.variables[variable][0]) == np.string_):
+            # Collapse the list of characters into a real string
+            variable_content = ""
+            for i in range(len(self.rootgrp.variables[variable][:])):
+                variable_content = variable_content + self.rootgrp.variables[variable][i]
+        else:
+            variable_content = str(self.rootgrp.variables[variable][0])
+        return variable_content
+
     def Draw(self):
         scrollWidget = QtGui.QWidget()
         grid = QtGui.QGridLayout()
