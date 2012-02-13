@@ -143,7 +143,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
 
         self.Refresh_View()
 
-    def Get_String_From_Variable_Content(self, variable):
+    def Get_String_From_Variable_Content(self, variable, units):
         if (type(self.rootgrp.variables[variable][0]) == np.string_):
             # Collapse the list of characters into a real string
             variable_content = ""
@@ -151,6 +151,11 @@ class NetCDF_Editor(QtGui.QMainWindow):
                 variable_content = variable_content + self.rootgrp.variables[variable][i]
         else:
             variable_content = str(self.rootgrp.variables[variable][0])
+            if (units):
+                try:
+                    variable_content += " " + self.rootgrp.variables[variable].units
+                except AttributeError:
+                    pass
         return variable_content
 
     def Draw(self):
@@ -164,7 +169,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
             button.clicked.connect(self.ButtonClick)
             grid.addWidget(button, line, 0)
             # Right column
-            value_to_show = self.Get_String_From_Variable_Content(variable)
+            value_to_show = self.Get_String_From_Variable_Content(variable, units = True)
             grid.addWidget(QtGui.QLabel(value_to_show), line, 1)
             line += 1
         scrollWidget.setLayout(grid)
@@ -220,7 +225,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
         variable = sender.text()
         self.statusBar().showMessage("Changing " + variable + "'s value")
 
-        old_value = self.Get_String_From_Variable_Content(variable)
+        old_value = self.Get_String_From_Variable_Content(variable, units = False)
 
         text, ok = QtGui.QInputDialog.getText(self, "Change variable's value", "Enter new value for \"" + variable + "\"", QtGui.QLineEdit.Normal, old_value)
         if ok:
