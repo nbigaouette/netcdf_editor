@@ -59,9 +59,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
         exitAction.triggered.connect(self.close)
 
         self.findWidget = QtGui.QLineEdit()
-        #self.findWidget.setShortcut('Ctrl+F')
         self.findWidget.setStatusTip('Find a variable name or value')
-        #self.findWidget.triggered.connect(self.Find)
         self.findWidget.textChanged.connect(self.Find)
         findLabel = QtGui.QLabel('&Find: ')
         findLabel.setBuddy(self.findWidget)
@@ -265,7 +263,6 @@ class NetCDF_Editor(QtGui.QMainWindow):
         self.filename = new_filename
 
     def Find(self):
-        print "Finding! self.findWidget.text =", self.findWidget.text()
         self.draw_filter = self.findWidget.text()
         self.Draw()
 
