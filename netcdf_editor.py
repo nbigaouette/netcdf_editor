@@ -172,14 +172,14 @@ class NetCDF_Editor(QtGui.QMainWindow):
         grid = QtGui.QGridLayout()
         line = 0
         for variable in self.rootgrp.variables:
-            if (self.draw_filter == "" or variable.find(self.draw_filter) != -1):
+            value_to_show = self.Get_String_From_Variable_Content(variable, units = True)
+            if (self.draw_filter == "" or variable.find(self.draw_filter) != -1 or value_to_show.find(self.draw_filter) != -1):
                 # Left column
                 button = QtGui.QPushButton(variable, self)
                 button.setToolTip("Click to edit \"" + variable + "\"'s value")
                 button.clicked.connect(self.ButtonClick)
                 grid.addWidget(button, line, 0)
                 # Right column
-                value_to_show = self.Get_String_From_Variable_Content(variable, units = True)
                 grid.addWidget(QtGui.QLabel(value_to_show), line, 1)
             line += 1
         scrollWidget.setLayout(grid)
