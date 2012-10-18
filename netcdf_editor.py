@@ -23,6 +23,7 @@ class NetCDF_Editor(QtGui.QMainWindow):
         self.input_filename = ""
         self.tmp_file       = ""
         self.file_is_saved  = True
+        self.draw_filter    = ""
         self.Initialize_UI()
 
         if (len(sys_argv) == 2):
@@ -57,6 +58,14 @@ class NetCDF_Editor(QtGui.QMainWindow):
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(self.close)
 
+        self.findWidget = QtGui.QLineEdit()
+        #self.findWidget.setShortcut('Ctrl+F')
+        self.findWidget.setStatusTip('Find a variable name or value')
+        #self.findWidget.triggered.connect(self.Find)
+        self.findWidget.textChanged.connect(self.Find)
+        findLabel = QtGui.QLabel('&Find: ')
+        findLabel.setBuddy(self.findWidget)
+
         self.statusBar()
 
         menubar = self.menuBar()
@@ -73,6 +82,8 @@ class NetCDF_Editor(QtGui.QMainWindow):
         toolbar.addAction(saveFileAs)
         toolbar.addAction(refresh)
         toolbar.addAction(exitAction)
+        toolbar.addWidget(findLabel)
+        toolbar.addWidget(self.findWidget)
 
         self.setGeometry(0, 0, 800, 600)
         self.setWindowTitle('Main window')
@@ -163,14 +174,15 @@ class NetCDF_Editor(QtGui.QMainWindow):
         grid = QtGui.QGridLayout()
         line = 0
         for variable in self.rootgrp.variables:
-            # Left column
-            button = QtGui.QPushButton(variable, self)
-            button.setToolTip("Click to edit \"" + variable + "\"'s value")
-            button.clicked.connect(self.ButtonClick)
-            grid.addWidget(button, line, 0)
-            # Right column
-            value_to_show = self.Get_String_From_Variable_Content(variable, units = True)
-            grid.addWidget(QtGui.QLabel(value_to_show), line, 1)
+            if (self.draw_filter == "" or variable.find(self.draw_filter) != -1):
+                # Left column
+                button = QtGui.QPushButton(variable, self)
+                button.setToolTip("Click to edit \"" + variable + "\"'s value")
+                button.clicked.connect(self.ButtonClick)
+                grid.addWidget(button, line, 0)
+                # Right column
+                value_to_show = self.Get_String_From_Variable_Content(variable, units = True)
+                grid.addWidget(QtGui.QLabel(value_to_show), line, 1)
             line += 1
         scrollWidget.setLayout(grid)
         self.scrollArea.setWidget(scrollWidget)
@@ -251,6 +263,11 @@ class NetCDF_Editor(QtGui.QMainWindow):
         print "Saving as", new_filename
         shutil.copy2(self.tmp_file.name, new_filename)
         self.filename = new_filename
+
+    def Find(self):
+        print "Finding! self.findWidget.text =", self.findWidget.text()
+        self.draw_filter = self.findWidget.text()
+        self.Draw()
 
 
 def main():
